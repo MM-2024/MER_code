@@ -150,6 +150,7 @@ if __name__ == '__main__':
     EMBEDDING_DIM = -1
     print(f'Find total "{len(vids)}" videos.')
     
+    error_file = []
 
     for i, vid in tqdm(enumerate(vids, 1), total=len(vids)):
         #print(f"Processing video '{vid}' ({i}/{len(vids)})...")
@@ -242,4 +243,7 @@ if __name__ == '__main__':
                 np.save(save_file, embeddings)
         except Exception as e:
             print(f"Error: {e} while processing video '{vid}'...") # 防止某些文件夹为空导致出现错误
+            error_file.append(vid)
             continue
+
+    print(f'all error files: {error_file}')

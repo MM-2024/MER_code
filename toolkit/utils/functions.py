@@ -14,7 +14,8 @@ from sklearn.metrics import confusion_matrix
 
 import torch
 import numpy as np
-
+import sys
+sys.path.append('/home/hao/Project/MERTools/MER2024')
 from toolkit.globals import *
 from toolkit.utils.read_files import func_read_key_from_csv
 from toolkit.utils.read_files import func_split_list_data

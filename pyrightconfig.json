@@ -1,0 +1,15 @@
+{
+    "exclude": [
+      "node_modules",
+      "venv",
+      "dist",
+      "build",
+      "docs",
+      ".git",
+      ".vscode",
+      "mer2024-dataset",
+      "mer2024-dataset-process",
+      "tools"
+    ]
+  }
+  

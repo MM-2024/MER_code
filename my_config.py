@@ -54,7 +54,7 @@ PATH_TO_RAW_FACE = {
     'MELD': os.path.join(DATA_DIR['MELD'], 'openface_face'),
     'SIMSv2': os.path.join(DATA_DIR['SIMSv2'], 'openface_face'),
     'AFFWILD2': os.path.join(DATA_DIR['AFFWILD2'], 'openface_face'),
-    'MER2024': os.path.join(DATA_DIR['MER2024'], 'croped_face/labeled_croped'), # '/data/public_datasets/MER_2024/mer2024-dataset-process/croped_face'
+    'MER2024': os.path.join(DATA_DIR['MER2024'], 'croped'), # '/data/public_datasets/MER_2024/mer2024-dataset-process/croped'
 }
 PATH_TO_TRANSCRIPTIONS = {
 	'MER2023': os.path.join(DATA_DIR['MER2023'], 'transcription-engchi-polish.csv'),
@@ -97,7 +97,7 @@ PATH_TO_LABEL = {
 # pre-trained models, including supervised and unsupervised
 PATH_TO_PRETRAINED_MODELS = 'tools'
 PATH_TO_OPENSMILE = 'tools/opensmile-2.3.0/'
-PATH_TO_FFMPEG = 'tools/ffmpeg-4.4.1-i686-static/ffmpeg'
+PATH_TO_FFMPEG = 'tools/ffmpeg-4.4.1-amd64-static/ffmpeg'
 PATH_TO_WENET = 'tools/wenet/wenetspeech_u2pp_conformer_libtorch'
 
 # dir

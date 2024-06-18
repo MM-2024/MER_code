@@ -29,7 +29,7 @@ class get_datasets(Dataset):
             'attention_topn': Data_Feat_TOPN,
         }
 
-        self.dataset_class = MODEL_DATASET_MAP[args.model]
+        self.dataset_class = MODEL_DATASET_MAP[args.model] # Data_Feat
         self.dataset = self.dataset_class(args, names, labels)
 
     def __len__(self):

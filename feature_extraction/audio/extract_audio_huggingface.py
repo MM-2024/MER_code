@@ -14,7 +14,7 @@ import my_config
 
 from transformers import AutoModel
 from transformers import WhisperFeatureExtractor, Wav2Vec2FeatureExtractor
-
+from tqdm import tqdm
 
 # supported models
 ################## ENGLISH ######################
@@ -68,47 +68,55 @@ def extract(model_name, audio_files, save_dir, feature_level, gpu):
         model.to(device)
     model.eval()
 
+    print(f'Loaded model "{model_name}".')
     # iterate audios
-    for idx, audio_file in enumerate(audio_files, 1):
+    failed_files = []
+    for idx, audio_file in tqdm(enumerate(audio_files, 1)):
         file_name = os.path.basename(audio_file)
         vid = file_name[:-4]
-        print(f'Processing "{file_name}" ({idx}/{len(audio_files)})...')
+        #print(f'Processing "{file_name}" ({idx}/{len(audio_files)})...')
 
-        ## process for too short ones
-        samples, sr = sf.read(audio_file)
-        assert sr == 16000, 'currently, we only test on 16k audio'
-        
-        ## model inference
-        with torch.no_grad():
-            if model_name in [WHISPER_BASE, WHISPER_LARGE]:
-                layer_ids = [-1]
-                input_features = feature_extractor(samples, sampling_rate=sr, return_tensors="pt").input_features # [1, 80, 3000]
-                decoder_input_ids = torch.tensor([[1, 1]]) * model.config.decoder_start_token_id
-                if gpu != -1: input_features = input_features.to(device)
-                if gpu != -1: decoder_input_ids = decoder_input_ids.to(device)
-                last_hidden_state = model(input_features, decoder_input_ids=decoder_input_ids).last_hidden_state
-                assert last_hidden_state.shape[0] == 1
-                feature = last_hidden_state[0].detach().squeeze().cpu().numpy() # (2, D)
+        try:
+            ## process for too short ones
+            samples, sr = sf.read(audio_file)
+            assert sr == 16000, 'currently, we only test on 16k audio'
+            
+            ## model inference
+            with torch.no_grad():
+                if model_name in [WHISPER_BASE, WHISPER_LARGE]:
+                    layer_ids = [-1]
+                    input_features = feature_extractor(samples, sampling_rate=sr, return_tensors="pt").input_features # [1, 80, 3000]
+                    decoder_input_ids = torch.tensor([[1, 1]]) * model.config.decoder_start_token_id
+                    if gpu != -1: input_features = input_features.to(device)
+                    if gpu != -1: decoder_input_ids = decoder_input_ids.to(device)
+                    last_hidden_state = model(input_features, decoder_input_ids=decoder_input_ids).last_hidden_state
+                    assert last_hidden_state.shape[0] == 1
+                    feature = last_hidden_state[0].detach().squeeze().cpu().numpy() # (2, D)
+                else:
+                    layer_ids = [-4, -3, -2, -1]
+                    input_values = feature_extractor(samples, sampling_rate=sr, return_tensors="pt").input_values # [1, wavlen]
+                    input_values = split_into_batch(input_values) # [bsize, maxlen=10*16000]
+                    if gpu != -1: input_values = input_values.to(device)
+                    hidden_states = model(input_values, output_hidden_states=True).hidden_states # tuple of (B, T, D)
+                    feature = torch.stack(hidden_states)[layer_ids].sum(dim=0)  # (B, T, D) # -> compress waveform channel
+                    bsize, segnum, featdim = feature.shape
+                    feature = feature.view(-1, featdim).detach().squeeze().cpu().numpy() # (B*T, D)
+
+            ## store values
+            csv_file = os.path.join(save_dir, f'{vid}.npy')
+            if feature_level == 'UTTERANCE':
+                feature = np.array(feature).squeeze()
+                if len(feature.shape) != 1:
+                    feature = np.mean(feature, axis=0)
+                np.save(csv_file, feature)
             else:
-                layer_ids = [-4, -3, -2, -1]
-                input_values = feature_extractor(samples, sampling_rate=sr, return_tensors="pt").input_values # [1, wavlen]
-                input_values = split_into_batch(input_values) # [bsize, maxlen=10*16000]
-                if gpu != -1: input_values = input_values.to(device)
-                hidden_states = model(input_values, output_hidden_states=True).hidden_states # tuple of (B, T, D)
-                feature = torch.stack(hidden_states)[layer_ids].sum(dim=0)  # (B, T, D) # -> compress waveform channel
-                bsize, segnum, featdim = feature.shape
-                feature = feature.view(-1, featdim).detach().squeeze().cpu().numpy() # (B*T, D)
+                np.save(csv_file, feature)
+        except Exception as e:
+            failed_files.append(audio_file)
+            print(f"Failed to process {audio_file}: {e}")
+            continue
 
-        ## store values
-        csv_file = os.path.join(save_dir, f'{vid}.npy')
-        if feature_level == 'UTTERANCE':
-            feature = np.array(feature).squeeze()
-            if len(feature.shape) != 1:
-                feature = np.mean(feature, axis=0)
-            np.save(csv_file, feature)
-        else:
-            np.save(csv_file, feature)
-
+    print(f"Failed files: {failed_files}")
     end_time = time.time()
     print(f'Total time used: {end_time - start_time:.1f}s.')
 

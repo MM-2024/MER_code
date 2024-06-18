@@ -87,6 +87,8 @@ def train_or_eval_model(args, model, reg_loss, cls_loss, dataloader, epoch, opti
     return save_results
 
 if __name__ == '__main__':
+    # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --gpu=2
+    
     parser = argparse.ArgumentParser()
 
     # Params for datasets
@@ -165,7 +167,13 @@ if __name__ == '__main__':
 
     ## generate model_config
     if args.hyper_path is None:
-        model_config = OmegaConf.load('toolkit/model-tune.yaml')[args.model]
+        model_config = OmegaConf.load('toolkit/model-tune.yaml')[args.model] 
+        '''attention:
+        hidden_dim: [64, 128, 256]
+        dropout: [0.2, 0.3, 0.4, 0.5]
+        grad_clip: [-1.0]
+        lr: [1e-3, 1e-4]
+        '''
         model_config = func_random_select(model_config)
     else:
         model_config = OmegaConf.load(args.hyper_path)[args.model]

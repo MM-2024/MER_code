@@ -21,11 +21,11 @@ step2: visual process
 # python -u extract_ferplus_embedding.py  --dataset=MER2024 --feature_level='UTTERANCE' --model='resnet50_ferplus_dag'                  --gpu=0                  
 # python -u extract_ferplus_embedding.py  --dataset=MER2024 --feature_level='UTTERANCE' --model='senet50_ferplus_dag'                   --gpu=0                 
 # python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='clip-vit-base-patch32'            --gpu=0            
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='clip-vit-large-patch14'           --gpu=0           
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='clip-vit-large-patch14'           --gpu=0         ✓   
 # python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='eva02_base_patch14_224.mim_in22k' --gpu=0 
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-base'                    --gpu=0      
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-base'                    --gpu=0         ✓ 
 
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-large'                   --gpu=0                   
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-large'                   --gpu=0         ✓          
 
 # python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='dinov2-large'                     --gpu=0                    
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_base_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-base-VoxCeleb2/checkpoint-99.pth
@@ -40,8 +40,8 @@ step3: audio process
 # cd feature_extraction/audio
 # python -u handcrafted_feature_extractor.py       --dataset='MER2024' --feature_level='UTTERANCE' --feature_extractor='opensmile' --feature_set='eGeMAPS' 
 # python -u extract_vggish_embedding.py            --dataset='MER2024' --feature_level='UTTERANCE'                                         --gpu=0
-# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-hubert-base'      --gpu=0
-# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-hubert-large'     --gpu=0
+# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-hubert-base'      --gpu=0      ✓ 
+# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-hubert-large'     --gpu=0      ✓ 
 # python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-wav2vec2-base'    --gpu=0
 # python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-wav2vec2-large'   --gpu=0
 # python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='whisper-base'             --gpu=0
@@ -63,7 +63,7 @@ step4: text process
 # python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-electra-180g-large'            --gpu=0
 # python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-xlnet-base'                    --gpu=0
 # python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-macbert-base'                  --gpu=0
-# python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-macbert-large'                 --gpu=0
+# python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-macbert-large'                 --gpu=0       ✓
 # python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-pert-base'                     --gpu=0
 # python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-pert-large'                    --gpu=0
 # python extract_text_huggingface.py --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-lert-base'                     --gpu=0
@@ -78,12 +78,13 @@ step4: text process
 
 step5: unimodal baseline => test different unimodal features
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=eGeMAPS_UTT --text_feature=eGeMAPS_UTT --video_feature=eGeMAPS_UTT --gpu=0
-
+# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=videomae-large-UTT --text_feature=videomae-large-UTT--gpu=2
 
 step6: multimodal baseline => [fusion_topn 1~6; fusion_modality in ['AV', 'AT', 'VT', 'AVT']]
 6.1 adjust AUDIO_RANK_LOW2HIGH  / TEXT_RANK_LOW2HIGH / IMAGR_RANK_LOW2HIGH  in toolkit/globals.py
 
-6.2 training => automatic selection top-n features for each modality
+6.2 training => automatic selection top-n features for each modality 
+# model 参数的不同会影响 get_dataset 和 get_model 的选择
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=1 --fusion_modality='AVT' --gpu=0
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=2 --fusion_modality='AVT' --gpu=0
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=3 --fusion_modality='AVT' --gpu=0

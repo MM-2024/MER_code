@@ -31,7 +31,7 @@ class get_dataloaders:
                 'SIMSv2': SIMSv2,
                 'MELD': MELD,
             }
-            self.dataloader = DATALOADER_MAP[args.dataset](args)
+            self.dataloader = DATALOADER_MAP[args.dataset](args) # MER2024(args)
         elif args.train_dataset in DIM_DATASET:
             assert args.test_dataset in DIM_DATASET
             self.dataloader = CROSSDIM(args)
@@ -40,7 +40,7 @@ class get_dataloaders:
             self.dataloader = CROSSDIS(args)
 
     def get_loaders(self):
-        return self.dataloader.get_loaders()
+        return self.dataloader.get_loaders() # MER2024(args).get_loaders()
     
     def calculate_results(self, emo_probs=[], emo_labels=[], val_preds=[], val_labels=[]):
         return self.dataloader.calculate_results(emo_probs, emo_labels, val_preds, val_labels)

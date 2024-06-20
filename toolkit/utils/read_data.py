@@ -26,13 +26,16 @@ def func_read_one_feat(argv=None, feature_root=None, name=None, processor=None, 
         single_feature = np.load(feature_path)
         single_feature = single_feature.squeeze() # [Dim, ] or [Time, Dim]
         feature.append(single_feature)
+        #print(len(feature))
     elif os.path.isdir(feature_dir):
         facenames = os.listdir(feature_dir) # 如果是文件夹，则依次读取文件夹内所有信息
         for facename in sorted(facenames):
             facefeat = np.load(os.path.join(feature_dir, facename))
             feature.append(facefeat)
     else:
-        raise Exception('feature path or dir do not exist!')
+        # 当特征不存在时，返回一个空的特征数组或占位符
+        print(f'Warning: feature path or dir do not exist for {name} in {feature_root}. Returning empty feature.')
+        return np.zeros((1, feature[0].shape))  # 或者返回一个特定的占位符特征，例如 np.zeros((1, feature_dim))
 
     # feature -> (seqlen, featdim)
     single_feature = np.array(feature).squeeze()
@@ -48,9 +51,20 @@ def func_read_one_feat(argv=None, feature_root=None, name=None, processor=None, 
 def func_read_multiprocess(feature_root, names, processor=None, read_type='feat', model_name=None):
     ## names => features
     params = []
+    processed_names = []  # 新增：用于记录实际尝试处理的特征名称
     for name in names:
-        params.append((feature_root, name, processor, model_name))
+        # 构建特征文件的路径，这里假设特征文件是.npy格式
+        feature_path = os.path.join(feature_root, name + '.npy')
+        
+        # 检查路径是否存在
+        if os.path.exists(feature_path):
+            params.append((feature_root, name, processor, model_name))
+            processed_names.append(name)  # 特征存在时，记录名称
+        else:
+            #print(f"Feature not found for {feature_root +'/'+ name}, skipping.")
+            pass
 
+    print(f'when process {feature_root.split('/')[-1]}, we have ',len(params))  # 打印存在的特征数量
     # ------ debug ------
     # func_read_one_feat(params[0])
     # func_read_one_e2e_video(params[0])
@@ -61,11 +75,11 @@ def func_read_multiprocess(feature_root, names, processor=None, read_type='feat'
         if read_type == 'feat':
             features = list(tqdm.tqdm(pool.imap(func_read_one_feat, params), total=len(params)))
 
-    ## save (names, features)
+    ## save (processed_names, features)
     feature_shape = np.array(features[0]).shape
     feature_name = os.path.basename(feature_root)
-    print (f'Input feature {feature_name} ===> dim is {feature_shape}')
-    assert len(names) == len(features), f'Error: len(names) != len(features)'
+    print(f'Input feature {feature_name} ===> dim is {feature_shape}')
+    assert len(processed_names) == len(features), f'Error: len(processed_names) != len(features)'
     return features, feature_shape[-1]
 
 

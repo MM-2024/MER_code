@@ -78,7 +78,9 @@ step4: text process
 
 step5: unimodal baseline => test different unimodal features
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=eGeMAPS_UTT --text_feature=eGeMAPS_UTT --video_feature=eGeMAPS_UTT --gpu=0
-# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=videomae-large-UTT --text_feature=videomae-large-UTT--gpu=2
+# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=chinese-hubert-large-UTT --text_feature=videomae-large-UTT --gpu=5
+# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=chinese-hubert-large-UTT --text_feature=qwen_chinese-macbert-large-UTT --gpu=2
+
 
 step6: multimodal baseline => [fusion_topn 1~6; fusion_modality in ['AV', 'AT', 'VT', 'AVT']]
 6.1 adjust AUDIO_RANK_LOW2HIGH  / TEXT_RANK_LOW2HIGH / IMAGR_RANK_LOW2HIGH  in toolkit/globals.py

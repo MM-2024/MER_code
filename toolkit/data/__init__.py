@@ -36,7 +36,17 @@ class get_datasets(Dataset):
         return self.dataset.__len__()
 
     def __getitem__(self, index):
-        return self.dataset.__getitem__(index)
+        dataset_length = len(self.dataset)
+        for offset in range(dataset_length):
+            try:
+                # 尝试获取当前索引的项
+                return self.dataset.__getitem__((index + offset) % dataset_length)
+            except Exception as e:
+                # 如果出现异常，打印异常信息（可选）并尝试下一个索引
+                #print(f"Error at index {index + offset % dataset_length}: {e}")
+                continue
+        # 如果所有索引都尝试失败，抛出异常
+        raise ValueError("Unable to retrieve any item from the dataset.")
 
     def collater(self, instances):
         return self.dataset.collater(instances)

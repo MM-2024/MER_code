@@ -21,7 +21,8 @@ class Data_Feat(Dataset):
             text_root  = os.path.join(feat_root, args.text_feature[-4].join([args.text_feature[:-4], args.snr, 'UTT']))
             video_root = os.path.join(feat_root, args.video_feature[-4].join([args.video_feature[:-4], args.snr, 'UTT']))
         print (f'audio feature root: {audio_root}')
-
+        print (f'video feature root: {video_root}')
+        print (f'text feature root: {text_root}')
         # --------------- temporal test ---------------
         # for name in names: assert os.path.exists(os.path.join(audio_root, name+'.npy'))
 
@@ -31,7 +32,25 @@ class Data_Feat(Dataset):
         assert self.feat_scale >= 1
         assert self.feat_type in ['utt', 'frm_align', 'frm_unalign']
 
-        # read datas (reduce __getitem__ durations)
+        print(type(names))
+        #if type(names) == list:
+        print('here',len(names)) # here 5030
+        # 检查特征文件是否存在，如果不存在则从列表中移除
+        existing_names = []
+        for name in self.names:
+            audio_path = os.path.join(audio_root, name + '.npy')
+            text_path = os.path.join(text_root, name + '.npy')
+            video_path = os.path.join(video_root, name + '.npy')
+            # 打印路径以帮助诊断问题
+            #print(f"Checking: {audio_path}, {text_path}, {video_path}")
+            if os.path.exists(audio_path)  and os.path.exists(video_path) and os.path.exists(text_path):
+                existing_names.append(name)
+            else:
+                print(f"Feature not found for {name}, skipping.")
+
+        # 更新names列表为只包含存在的特征文件的名称
+        self.names = existing_names
+        # 现在使用更新后的names列表调用func_read_multiprocess
         audios, self.adim = func_read_multiprocess(audio_root, self.names, read_type='feat')
         texts,  self.tdim = func_read_multiprocess(text_root,  self.names, read_type='feat')
         videos, self.vdim = func_read_multiprocess(video_root, self.names, read_type='feat')

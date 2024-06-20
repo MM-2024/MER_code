@@ -226,6 +226,6 @@ TEXT_RANK_LOW2HIGH = [
 ]
 
 IMAGR_RANK_LOW2HIGH = [
-    'VideoMAE-base', 'EmoNet', 'VideoMAE-large', 'DINOv2-large', 'SENet-FER2013', 'ResNet-FER2013', 
-    'MANet-RAFDB', 'EVA-02-base', 'CLIP-base', 'VideoMAE-base (VoxCeleb2)', 'VideoMAE-base (MER2023)', 'CLIP-large', 
+    'VideoMAE-base', 'EmoNet',  'DINOv2-large', 'SENet-FER2013', 'ResNet-FER2013', 
+    'MANet-RAFDB', 'EVA-02-base', 'CLIP-base', 'VideoMAE-base (VoxCeleb2)', 'VideoMAE-base (MER2023)', 'CLIP-large', 'VideoMAE-large',
 ]

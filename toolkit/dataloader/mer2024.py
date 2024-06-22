@@ -67,6 +67,7 @@ class MER2024:
         for data_type in ['test1']:
             names, labels = self.read_names_labels(self.label_path, data_type, debug=self.debug)
             print (f'{data_type}: sample number {len(names)}')
+            print(f'when process 11.5w unlabeled data, we have {len(labels)} labels')
             self.args.snr = self.args.test_snr
             test_dataset = get_datasets(self.args, names, labels)
             test_loader = DataLoader(test_dataset,

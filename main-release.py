@@ -243,6 +243,7 @@ if __name__ == '__main__':
 
             ## training and validation
             train_results = train_or_eval_model(args, model, reg_loss, cls_loss, train_loader, epoch=epoch, optimizer=optimizer, train=True )
+            print(len(train_loader))
             eval_results  = train_or_eval_model(args, model, reg_loss, cls_loss, eval_loader,  epoch=epoch, optimizer=None,      train=False)
             func_update_storage(inputs=eval_results, prefix='eval', outputs=epoch_store)
             # print (epoch_store.keys()) # debug
@@ -278,9 +279,9 @@ if __name__ == '__main__':
     print ('====== Prediction and Saving =======')
     args.duration = np.sum(folder_duration) # store duration
     
-    ## store cv results (using average)
+    ## store cv results (using average) 勾吧哪有把cross-valdation简写成cv的？？？我真的服了
     # print (folder_save[0].keys())
-    cv_result = gain_cv_results(folder_save)
+    cv_result = gain_cv_results(folder_save) 
     save_path = f'{save_resroot}/cv_{prefix_name}_{cv_result}_{name_time}.npz'
     print (f'save results in {save_path}')
     np.savez_compressed(save_path,

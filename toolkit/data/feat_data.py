@@ -46,7 +46,8 @@ class Data_Feat(Dataset):
             if os.path.exists(audio_path)  and os.path.exists(video_path) and os.path.exists(text_path):
                 existing_names.append(name)
             else:
-                print(f"Feature not found for {name}, skipping.")
+                #print(f"Feature not found for {name}, skipping.")
+                pass
 
         # 更新names列表为只包含存在的特征文件的名称
         self.names = existing_names

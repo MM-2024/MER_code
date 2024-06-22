@@ -29,6 +29,7 @@ step2: visual process
 
 # python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='dinov2-large'                     --gpu=0                    
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_base_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-base-VoxCeleb2/checkpoint-99.pth
+# CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_large_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-base-VoxCeleb2/checkpoint-99.pth
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_base_patch16_224 --input_size 224 --short_side_size 224 --finetune tools/videomae-base-K400-mer2023/checkpoint-299.pth
 
 
@@ -80,7 +81,7 @@ step5: unimodal baseline => test different unimodal features
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=eGeMAPS_UTT --text_feature=eGeMAPS_UTT --video_feature=eGeMAPS_UTT --gpu=0
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=chinese-hubert-large-UTT --text_feature=videomae-large-UTT --gpu=5
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=chinese-hubert-large-UTT --text_feature=qwen_chinese-macbert-large-UTT --gpu=2
-
+# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=chinese-hubert-large-UTT --text_feature=chinese-hubert-large-UTT --video_feature=chinese-hubert-large-UTT --gpu=0
 
 step6: multimodal baseline => [fusion_topn 1~6; fusion_modality in ['AV', 'AT', 'VT', 'AVT']]
 6.1 adjust AUDIO_RANK_LOW2HIGH  / TEXT_RANK_LOW2HIGH / IMAGR_RANK_LOW2HIGH  in toolkit/globals.py

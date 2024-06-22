@@ -227,7 +227,7 @@ def main(args):
     # -------------------- define face_dir and save_dir ---------------------- #
     ## feature extraction
     face_dir = my_config.PATH_TO_RAW_FACE[args.dataset]
-
+    print(f'face_dir: {face_dir}')
     # gain save_dir
     model_name, epoch_name = args.finetune.split('/')[-2:]
     epoch_name = epoch_name[:-4].split('-')[1]
@@ -326,7 +326,7 @@ def main(args):
     model.to(device)
 
     # -------------------- feature extractor ---------------------- #
-    face_npys = glob.glob(face_dir + '/*/*.npy')
+    face_npys = glob.glob(face_dir + '/*/*.png')
     ## 打乱vid，方便进行双管齐下的特征提取
     indices = np.arange(len(face_npys))
     random.shuffle(indices)

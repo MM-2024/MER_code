@@ -89,6 +89,7 @@ step6: multimodal baseline => [fusion_topn 1~6; fusion_modality in ['AV', 'AT', 
 6.2 training => automatic selection top-n features for each modality 
 # model 参数的不同会影响 get_dataset 和 get_model 的选择
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=1 --fusion_modality='AVT' --gpu=0
+# python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=1 --fusion_modality='AV' --gpu=0
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=2 --fusion_modality='AVT' --gpu=0
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=3 --fusion_modality='AVT' --gpu=0
 # python -u main-release.py --model=attention_topn --feat_type='utt' --dataset=MER2024 --fusion_topn=4 --fusion_modality='AVT' --gpu=0

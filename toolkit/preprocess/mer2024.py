@@ -27,12 +27,20 @@ def read_train_label(train_video, train_label):
 
 ## 解析 test_label
 def read_test_label(test_video, test_label):
+
+    new_candidate_path = '/data/public_datasets/MER_2024/new_release/candidate_20000.csv'
+    ## 从 candidate_20000.csv 读取候选视频名称
+    candidate_df = pd.read_csv(new_candidate_path)
+    candidate_names = set(candidate_df['name'].tolist())  # 假设候选文件中有一列名为 'video_name'
+
     video_names = os.listdir(test_video)
     video_names = [item.rsplit('.')[0] for item in video_names]
-    emos = ['neutral'] * len(video_names)
-    print(f'test: {len(emos)}')
-    return video_names, emos
 
+    # 过滤只包含在 candidate_names 中的视频
+    filtered_video_names = [name for name in video_names if name in candidate_names]
+    emos = ['neutral'] * len(filtered_video_names)
+    print(f'test: {len(emos)}')
+    return filtered_video_names, emos
 
 def normalize_dataset_format(data_root, save_root):
 

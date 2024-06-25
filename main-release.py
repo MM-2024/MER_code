@@ -279,7 +279,7 @@ if __name__ == '__main__':
     print ('====== Prediction and Saving =======')
     args.duration = np.sum(folder_duration) # store duration
     
-    ## store cv results (using average) 勾吧哪有把cross-valdation简写成cv的？？？我真的服了
+    ## store cv results (using average) cross-valdation即为cv
     # print (folder_save[0].keys())
     cv_result = gain_cv_results(folder_save) 
     save_path = f'{save_resroot}/cv_{prefix_name}_{cv_result}_{name_time}.npz'

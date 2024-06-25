@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from toolkit.utils.read_data import *
 
 class Data_Feat(Dataset):
-    def __init__(self, args, names, labels):
+    def __init__(self, args, names, labels): # label由两个标签构成，'emo'=情感标签，'val'=情感强度标签, 后者恒等于 -10， 就是说没啥用
 
         # analyze path
         self.names = names
@@ -46,7 +46,7 @@ class Data_Feat(Dataset):
             if os.path.exists(audio_path)  and os.path.exists(video_path) and os.path.exists(text_path):
                 existing_names.append(name)
             else:
-                #print(f"Feature not found for {name}, skipping.")
+                print(f"Feature not found for {name}, skipping.")
                 pass
 
         # 更新names列表为只包含存在的特征文件的名称

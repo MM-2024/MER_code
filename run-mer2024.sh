@@ -34,6 +34,9 @@ step2: visual process
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_large_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-base-VoxCeleb2/checkpoint-99.pth
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_large_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-large-VoxCeleb2/checkpoint-99.pth
 
+# CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_large_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-large-VoxCeleb2/checkpoint-99.pth --sampling_rate=1
+# 一定要给sampling_rate这个超参数，因为我之前取帧的时候已经按照4帧间隔了
+
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_base_patch16_224 --input_size 224 --short_side_size 224 --finetune tools/videomae-base-K400-mer2023/checkpoint-299.pth
 
 

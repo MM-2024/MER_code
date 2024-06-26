@@ -13,6 +13,8 @@ import videomae.modeling_finetune
 from videomae.datasets import build_dataset
 from videomae.engine_for_finetuning import final_test
 import videomae.utils as utils
+from PIL import Image
+from tqdm import tqdm
 
 # import config
 import sys
@@ -232,6 +234,7 @@ def main(args):
     model_name, epoch_name = args.finetune.split('/')[-2:]
     epoch_name = epoch_name[:-4].split('-')[1]
     model_name = f'{model_name}-{epoch_name}'
+    print(f'using model {model_name}')
     save_dir = os.path.join(my_config.PATH_TO_FEATURES[args.dataset], f'{model_name}-{args.feature_level[:3]}')
     # save_dir = os.path.join('./', f'sunlicai-{model_name}-{args.feature_level[:3]}') # 临时测试，保存在当前目录下
     if not os.path.exists(save_dir): 
@@ -326,7 +329,32 @@ def main(args):
     model.to(device)
 
     # -------------------- feature extractor ---------------------- #
-    face_npys = glob.glob(face_dir + '/*/*.png')
+    face_npys = glob.glob(face_dir + '/*/*.npy') # face_dir: /data/public_datasets/MER_2024/mer2024-dataset-process/croped
+
+    # video_names = os.listdir(face_dir)
+    # #video_names=video_names[:10]
+    # #print(video_names)
+    # face_npys = []
+    # print(f'Now processing all {len(video_names)} videos')
+    # for name in tqdm(video_names):
+    #     file_dir = os.path.join(face_dir, name)
+    #     if os.path.isdir(file_dir):
+    #         faces = glob.glob(file_dir + '/*.png')
+    #         if len(faces) == 0:
+    #             print(f'{name} has no face')
+    #             continue
+    #         video = []
+    #         for face in sorted(faces):  # 确保按文件名排序
+    #             img = Image.open(face)
+    #             img_array = np.array(img)
+    #             video.append(img_array)
+    #         video = np.array(video)
+            
+    #         # 临时保存到文件以便后续处理
+    #         npy_file = os.path.join(face_dir, f'{name}.npy')
+    #         np.save(npy_file, video)
+    #         face_npys.append(npy_file)
+    # print(f'Processing videos end !')
     ## 打乱vid，方便进行双管齐下的特征提取
     indices = np.arange(len(face_npys))
     random.shuffle(indices)
@@ -336,31 +364,35 @@ def main(args):
         face_npys = face_npys[:10]
     print (f'process sample number: {len(face_npys)}')
 
-    for ii, face_npy in enumerate(face_npys):
+    for ii, face_npy in tqdm(enumerate(face_npys)):
         print (f'process on {ii}|{len(face_npys)}: {face_npy}')
+        try:
+            vid = os.path.basename(face_npy).rsplit('.', 1)[0]
+            save_file = os.path.join(save_dir, f'{vid}.npy')
+            if os.path.exists(save_file):
+                continue
+            else:
+                # load test dataset
+                dataset_test = build_dataset(args, face_npy)
+                #print(len(dataset_test))
+                data_loader_test = torch.utils.data.DataLoader(
+                    dataset_test, 
+                    batch_size=args.batch_size,
+                    num_workers=args.num_workers,
+                    pin_memory=args.pin_mem,
+                    drop_last=False
+                )
 
-        vid = os.path.basename(face_npy).rsplit('.', 1)[0]
-        save_file = os.path.join(save_dir, f'{vid}.npy')
-        if os.path.exists(save_file):
+                # feature extraction
+                embeddings = final_test(data_loader_test, model, args.feature_level, device)
+                np.save(save_file, embeddings)
+
+                # # compare with pre-features
+                # yy = np.load('/share/home/lianzheng/chinese-mer-2023/dataset/mer2023-dataset-process/features/pretrain-videomae-base-VoxCeleb2-99/' + f'{vid}.npy')
+                # print (yy - embeddings)
+        except Exception as e:
+            print (f'error on {face_npy}: {e}')
             continue
-
-        # load test dataset
-        dataset_test = build_dataset(args, face_npy)
-        data_loader_test = torch.utils.data.DataLoader(
-            dataset_test, 
-            batch_size=args.batch_size,
-            num_workers=args.num_workers,
-            pin_memory=args.pin_mem,
-            drop_last=False
-        )
-
-        # feature extraction
-        embeddings = final_test(data_loader_test, model, args.feature_level, device)
-        np.save(save_file, embeddings)
-
-        # # compare with pre-features
-        # yy = np.load('/share/home/lianzheng/chinese-mer-2023/dataset/mer2023-dataset-process/features/pretrain-videomae-base-VoxCeleb2-99/' + f'{vid}.npy')
-        # print (yy - embeddings)
 
 
 '''
@@ -385,7 +417,7 @@ CUDA_VISIBLE_DEVICES=0 nohup python -u extract_sun_videomae.py --dataset AFFWILD
 CUDA_VISIBLE_DEVICES=1 nohup python -u extract_sun_videomae.py --dataset AFFWILD2 --feature_level FRAME --batch_size 64 --model vit_base_patch16_160 --input_size 160 --short_side_size 160 --finetune videomae/pretrain_models/videomae-base-VoxCeleb2/checkpoint-99.pth        >2.out &
 CUDA_VISIBLE_DEVICES=0 nohup python -u extract_sun_videomae.py --dataset AFFWILD2 --feature_level FRAME --batch_size 64 --model vit_base_patch16_160 --input_size 160 --short_side_size 160 --finetune videomae/pretrain_models/videomae-base-VoxCeleb2/checkpoint-99.pth        >3.out &
 CUDA_VISIBLE_DEVICES=1 nohup python -u extract_sun_videomae.py --dataset AFFWILD2 --feature_level FRAME --batch_size 64 --model vit_base_patch16_160 --input_size 160 --short_side_size 160 --finetune videomae/pretrain_models/videomae-base-VoxCeleb2/checkpoint-99.pth        >4.out &
-
+CUDA_VISIBLE_DEVICES=0       python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_base_patch16_224 --input_size 224 --short_side_size 224 --finetune tools/videomae-base-K400-mer2023/checkpoint-299.pth\
 ## 测试过程中，好像large模型有些问题，需要进一步debug
 
 '''

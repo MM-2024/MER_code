@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 
 from toolkit.globals import *
 from toolkit.utils.read_data import *
+import random
 
 ## select top performed features for each modality
 class Data_Feat_TOPN(Dataset):
@@ -63,14 +64,19 @@ class Data_Feat_TOPN(Dataset):
 
 
     def __getitem__(self, index):
-        instance = dict(
-            emo   = self.labels[index]['emo'],
-            val   = self.labels[index]['val'],
-            name  = self.names[index],
-        )
-        for ii, features in enumerate(self.whole_features):
-            instance[f'feat{ii}'] = features[index]
-        return instance
+        try:
+            instance = dict(
+                emo   = self.labels[index]['emo'],
+                val   = self.labels[index]['val'],
+                name  = self.names[index],
+            )
+            for ii, features in enumerate(self.whole_features):
+                instance[f'feat{ii}'] = features[index]
+            return instance
+        except Exception as e:
+            print(f"Error with index {index}: {e}. Selecting a random sample instead.")
+            new_index = random.randint(0, len(self.names) - 1)
+            return self.__getitem__(new_index)
     
 
     def collater(self, instances):

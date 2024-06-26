@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset
 from toolkit.utils.read_data import *
+import random
 
 class Data_Feat(Dataset):
     def __init__(self, args, names, labels): # label由两个标签构成，'emo'=情感标签，'val'=情感强度标签, 后者恒等于 -10， 就是说没啥用
@@ -74,16 +75,25 @@ class Data_Feat(Dataset):
         return len(self.names)
 
 
+
     def __getitem__(self, index):
-        instance = dict(
-            audio = self.audios[index],
-            text  = self.texts[index],
-            video = self.videos[index],
-            emo   = self.labels[index]['emo'],
-            val   = self.labels[index]['val'],
-            name  = self.names[index],
-        )
-        return instance
+        
+        try:
+            instance = dict(
+                audio = self.audios[index],
+                text  = self.texts[index],
+                video = self.videos[index],
+                emo   = self.labels[index]['emo'],
+                val   = self.labels[index]['val'],
+                name  = self.names[index],
+            )
+            if index == 19999:
+                print(instance)
+            return instance
+        except Exception as e:
+            print(f"Error with index {index}: {e}. Selecting a random sample instead.")
+            new_index = random.randint(0, len(self.names) - 1)
+            return self.__getitem__(new_index)
     
 
     def collater(self, instances):

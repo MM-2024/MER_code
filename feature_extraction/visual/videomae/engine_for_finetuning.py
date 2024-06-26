@@ -17,11 +17,14 @@ def final_test(data_loader, model, feature_level, device):
         videos = batch[0] # [64, 3, 16, 160, 160]
         frmids = batch[1] # [64], 对于句子级别全是0，对于帧级别会有差异
 
+        #print(videos.shape)
+        #print(frmids.shape)
+
         videos = videos.to(device, non_blocking=True)
         with torch.cuda.amp.autocast():
             output, saved_feature = model(videos, save_feature=True) # saved_feature: [64, 768]
             
-        for i in range(output.size(0)): # range(64)
+        for i in range(output.size(0)): # range(64) # output.size(0) 是batch_size
             if frmids[i] not in saved_features:
                 saved_features[frmids[i]] = []
             saved_features[frmids[i]].append(saved_feature.data[i].cpu().numpy().tolist())

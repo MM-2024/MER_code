@@ -32,7 +32,11 @@ class VideoClsDatasetFrame(Dataset):
         self.test_num_crop = test_num_crop
         self.args = args
 
-        self.frames = np.load(face_npy)
+        try:
+            self.frames = np.load(face_npy)
+        except Exception as e:
+            print(f'Error loading {face_npy}: {e}')
+            
         self.nframes = len(self.frames)
         self.feature_level = args.feature_level
         

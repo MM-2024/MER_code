@@ -1448,7 +1448,7 @@ class VisionTransformer(nn.Module):
             else: # use all tokens for classification
                 x = rearrange(x, 'b n s c -> b (n s) c') # s = 1 + thw
 
-        else:
+        else: # attn_typr='joint'
             for blk in self.blocks:
                 x = blk(x)
 
@@ -1473,7 +1473,7 @@ class VisionTransformer(nn.Module):
         else:
             # return x[:, 0]
             # NOTE: tmp change for mer2023 feature extraction in 2023/11/27 on 102!!!
-            return x.mean(1)
+            return x.mean(1) # (4,800,1024) -> (4,1024)
 
     def forward(self, x, save_feature=False):
         x = self.forward_features(x)

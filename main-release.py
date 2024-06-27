@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 from omegaconf import OmegaConf
 from thop import profile
+import csv
 
 import torch
 import torch.optim as optim
@@ -289,11 +290,23 @@ if __name__ == '__main__':
 
     ## store test1 results => [we store results on 'emo_probs']
     for jj in range(len(test_loaders)):
-        emo_labels, emo_probs = average_folder_for_emos(folder_save, f'test{jj+1}')
-        val_labels, val_preds = average_folder_for_vals(folder_save, f'test{jj+1}')
-        _, test_result = dataloader_class.calculate_results(emo_probs, emo_labels, val_preds, val_labels)
+        emo_labels, emo_probs, names = average_folder_for_emos(folder_save, f'test{jj+1}') # 由于全部设置为neutral， emo_labels全是0， 所以下面计算出的结果没啥用
+        val_labels, val_preds = average_folder_for_vals(folder_save, f'test{jj+1}') # 实际上会 return [], []
+        _, test_result = dataloader_class.calculate_results(emo_probs, emo_labels, val_preds, val_labels) # 这个结果没啥用
+
+
         save_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}.npz'
         print (f'save results in {save_path}')
         np.savez_compressed(save_path,
                             emo_probs=emo_probs,
                             args=np.array(args, dtype=object))
+        
+        # save to csv
+        print(idx2emo_mer)
+        save_csv_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}.csv'
+        print (f'save csv file in {save_csv_path}')
+        with open(save_csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['name', 'discrete'])
+            for ii in range(len(names)):
+                writer.writerow([names[ii], emo_probs[ii]])

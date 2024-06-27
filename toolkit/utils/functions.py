@@ -195,7 +195,7 @@ def func_update_storage(inputs, prefix, outputs):
     for key in inputs:
         val = inputs[key]
         # update key and value
-        newkey = f'{prefix}_{key}'
+        newkey = f'{prefix}_{key}' # perfix: test0, test1 ...  key:'names','loss','emoprobs','emolabels','emoacc',emodscores'
         newval = val
         # store into outputs
         assert newkey not in outputs

@@ -173,6 +173,7 @@ featname_mapping = {
     'dinov2-large': 'DINOv2-large',
     'videomae-base-K400-mer2023-299': 'VideoMAE-base (MER2023)',
     'videomae-base-VoxCeleb2-99':     'VideoMAE-base (VoxCeleb2)',
+    'videomae-large-VoxCeleb2-99':    'VideoMAE-large (VoxCeleb2)',
 
     'albert_chinese_small': 'ALBERT-small',
     'opt-13b': 'OPT-13B',
@@ -227,5 +228,5 @@ TEXT_RANK_LOW2HIGH = [
 
 IMAGR_RANK_LOW2HIGH = [
     'VideoMAE-base', 'EmoNet',  'DINOv2-large', 'SENet-FER2013', 'ResNet-FER2013', 
-    'MANet-RAFDB', 'EVA-02-base', 'CLIP-base', 'VideoMAE-base (VoxCeleb2)', 'VideoMAE-base (MER2023)', 'CLIP-large'
+    'MANet-RAFDB', 'EVA-02-base', 'CLIP-base', 'VideoMAE-base (VoxCeleb2)', 'VideoMAE-base (MER2023)', 'CLIP-large', 'VideoMAE-large (VoxCeleb2)'
 ]

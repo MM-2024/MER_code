@@ -77,7 +77,8 @@ def average_folder_for_emos(folder_save, testname):
         avg_emoprob = np.mean(per_probs, axis=0)
         avg_preds.append(avg_emoprob)
     
-    return labels, avg_preds
+    names=folder_save[0][f'{testname}_names']
+    return labels, avg_preds, names
 
 # 计算 name -> val
 def average_folder_for_vals(folder_save, testname):

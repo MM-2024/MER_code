@@ -18,16 +18,16 @@ step2: visual process
 # cd feature_extraction/visual
 # python -u extract_manet_embedding.py    --dataset=MER2024 --feature_level='UTTERANCE'                                                 --gpu=0                                                
 # python -u extract_emonet_embedding.py   --dataset=MER2024 --feature_level='UTTERANCE'                                                 --gpu=0                                                
-# python -u extract_ferplus_embedding.py  --dataset=MER2024 --feature_level='UTTERANCE' --model='resnet50_ferplus_dag'                  --gpu=0                  
-# python -u extract_ferplus_embedding.py  --dataset=MER2024 --feature_level='UTTERANCE' --model='senet50_ferplus_dag'                   --gpu=0                 
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='clip-vit-base-patch32'            --gpu=0            
+# python -u extract_ferplus_embedding.py  --dataset=MER2024 --feature_level='UTTERANCE' --model='resnet50_ferplus_dag'                  --gpu=0         报错    ValueError: invalid literal for int() with base 10: 'samplenew3_00073099'
+# python -u extract_ferplus_embedding.py  --dataset=MER2024 --feature_level='UTTERANCE' --model='senet50_ferplus_dag'                   --gpu=0         报错    ValueError: invalid literal for int() with base 10: 'samplenew3_00073099'     
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='clip-vit-base-patch32'            --gpu=0         ✓
 # python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='clip-vit-large-patch14'           --gpu=0         ✓   
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='eva02_base_patch14_224.mim_in22k' --gpu=0 
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-base'                    --gpu=0         ✓ 
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='eva02_base_patch14_224.mim_in22k' --gpu=0       running
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-base'                    --gpu=0         ✓  
 
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-large'                   --gpu=0         ✓          
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-large'                   --gpu=0         ✓             
 
-# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='dinov2-large'                     --gpu=0                    
+# python -u extract_vision_huggingface.py --dataset=MER2024 --feature_level='UTTERANCE' --model_name='dinov2-large'                     --gpu=0           running         
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_base_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-base-VoxCeleb2/checkpoint-99.pth
 # CUDA_VISIBLE_DEVICES=0 python -u extract_sun_videomae.py --dataset MER2024 --feature_level UTTERANCE --batch_size 64 --model vit_large_patch16_160 --input_size 160 --short_side_size 160 --finetune tools/videomae-base-VoxCeleb2/checkpoint-99.pth
 
@@ -46,14 +46,14 @@ step3: audio process
 
 3.2 audio feature extraction
 # cd feature_extraction/audio
-# python -u handcrafted_feature_extractor.py       --dataset='MER2024' --feature_level='UTTERANCE' --feature_extractor='opensmile' --feature_set='eGeMAPS' 
-# python -u extract_vggish_embedding.py            --dataset='MER2024' --feature_level='UTTERANCE'                                         --gpu=0
+# python -u handcrafted_feature_extractor.py       --dataset='MER2024' --feature_level='UTTERANCE' --feature_extractor='opensmile' --feature_set='eGeMAPS'  ✓ 
+# python -u extract_vggish_embedding.py            --dataset='MER2024' --feature_level='UTTERANCE'                                         --gpu=0      ×
 # python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-hubert-base'      --gpu=0      ✓ 
 # python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-hubert-large'     --gpu=0      ✓ 
-# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-wav2vec2-base'    --gpu=0
-# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-wav2vec2-large'   --gpu=0
-# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='whisper-base'             --gpu=0
-# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='whisper-large-v2'         --gpu=0
+# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-wav2vec2-base'    --gpu=0      ✓
+# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='chinese-wav2vec2-large'   --gpu=0      ✓
+# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='whisper-base'             --gpu=0      ✓
+# python -u extract_audio_huggingface.py           --dataset='MER2024' --feature_level='UTTERANCE' --model_name='whisper-large-v2'         --gpu=0      ✓
 # python -u extract_emotion2vec.py                 --dataset='MER2024' --feature_level='UTTERANCE'                                        
 
 

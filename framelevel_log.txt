@@ -1,0 +1,25 @@
+====== Params Pre-analysis =======
+args:  Namespace(dataset='MER2024', train_dataset=None, test_dataset=None, train_snr=None, test_snr=None, fusion_topn=None, fusion_modality='AVT', save_root='./saved-unimodal', debug=False, savemodel=False, save_iters=100000000.0, audio_feature='chinese-hubert-large-FRA', text_feature='chinese-hubert-large-FRA', video_feature='chinese-hubert-large-FRA', feat_type='utt', feat_scale=1, e2e_name=None, e2e_dim=None, n_classes=None, hyper_path=None, model='attention', lr=0.0001, lr_adjust='case1', l2=1e-05, batch_size=32, num_workers=0, epochs=100, print_iters=100000000.0, gpu=0, hidden_dim=64, dropout=0.4, grad_clip=-1.0)
+====== Reading Data =======
+train: sample number 5030
+audio feature root: /data/public_datasets/MER_2024/mer2024-dataset-process/features/chinese-hubert-large-FRA
+video feature root: /data/public_datasets/MER_2024/mer2024-dataset-process/features/chinese-hubert-large-FRA
+text feature root: /data/public_datasets/MER_2024/mer2024-dataset-process/features/chinese-hubert-large-FRA
+<class 'list'>
+here 5030
+when process chinese-hubert-large-FRA, we have  5030
+Input feature chinese-hubert-large-FRA ===> dim is (85, 1024)
+when process chinese-hubert-large-FRA, we have  5030
+Input feature chinese-hubert-large-FRA ===> dim is (85, 1024)
+when process chinese-hubert-large-FRA, we have  5030
+Input feature chinese-hubert-large-FRA ===> dim is (85, 1024)
+test1: sample number 115595
+when process 11.5w unlabeled data, we have 115595 labels
+audio feature root: /data/public_datasets/MER_2024/mer2024-dataset-process/features/chinese-hubert-large-FRA
+video feature root: /data/public_datasets/MER_2024/mer2024-dataset-process/features/chinese-hubert-large-FRA
+text feature root: /data/public_datasets/MER_2024/mer2024-dataset-process/features/chinese-hubert-large-FRA
+<class 'list'>
+here 115595
+when process chinese-hubert-large-FRA, we have  115595
+Input feature chinese-hubert-large-FRA ===> dim is (115, 1024)
+when process chinese-hubert-large-FRA, we have  115595

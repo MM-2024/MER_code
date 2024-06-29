@@ -8,6 +8,7 @@ import csv
 
 import torch
 import torch.optim as optim
+import ipdb
 
 from toolkit.utils.loss import *
 from toolkit.utils.metric import *
@@ -35,6 +36,8 @@ def train_or_eval_model(args, model, reg_loss, cls_loss, dataloader, epoch, opti
         
         # read data + cuda
         batch, emos, vals, bnames = data
+        
+        # ipdb.set_trace()
         vidnames += bnames
         for key in batch: batch[key] = batch[key].cuda()
         emos = emos.cuda()
@@ -202,6 +205,8 @@ if __name__ == '__main__':
 
     print ('====== Reading Data =======')
     dataloader_class = get_dataloaders(args) # (MER2023 + e2e + e2e_name) 数据集+数据读取方式
+
+    "利用get_dataloaders, 处理数据"
     train_loaders, eval_loaders, test_loaders = dataloader_class.get_loaders()
     # for ii, data in enumerate(train_loaders[0]): break ## debug
     assert len(train_loaders) == len(eval_loaders)

@@ -18,14 +18,15 @@ def extract(audio_files, save_dir, feature_level, finetune):
     start_time = time.time()
 
     # 如果有gpu的话，模型会自动加载
-    if finetune:
-        inference_pipeline = pipeline(task=Tasks.emotion_recognition,
-                                      model="/share/home/lianzheng/tools/emotion2vec_base_finetuned")
-    else:
-        inference_pipeline = pipeline(task=Tasks.emotion_recognition, 
-                                    model="/share/home/lianzheng/tools/emotion2vec_base", 
-                                    model_revision="v2.0.4")
-        
+    # if finetune:
+    #     inference_pipeline = pipeline(task=Tasks.emotion_recognition,
+    #                                   model="/home/mer/MERTools/MER2024/tools/transformers/emotion2vec_base_finetuned")
+    # else:
+    #     inference_pipeline = pipeline(task=Tasks.emotion_recognition, 
+    #                                 model="/share/home/lianzheng/tools/emotion2vec_base", 
+    #                                 model_revision="v2.0.4")
+    inference_pipeline = pipeline(task=Tasks.emotion_recognition,
+                                      model="/home/mer/MERTools/MER2024/tools/transformers/emotion2vec_base_finetuned")
     # iterate audios
     for idx, audio_file in enumerate(audio_files, 1):
         file_name = os.path.basename(audio_file)

@@ -127,7 +127,7 @@ if __name__ == '__main__':
         model = AutoModel.from_pretrained(model_dir)
         processor  = AutoImageProcessor.from_pretrained(model_dir)
     elif params.model_name in [EVACLIP_VIT]: # from timm
-        model_path = os.path.join(my_config.PATH_TO_PRETRAINED_MODELS, f'timm/{params.model_name}/model.safetensors')
+        model_path = os.path.join(my_config.PATH_TO_PRETRAINED_MODELS,f'transformers/{params.model_name}/model.safetensors')
         model = timm.create_model(params.model_name, pretrained=True, num_classes=0,pretrained_cfg_overlay=dict(file=model_path))
         data_config = timm.data.resolve_model_data_config(model)
         transforms = timm.data.create_transform(**data_config, is_training=False)

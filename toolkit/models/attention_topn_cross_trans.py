@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 from .modules.encoder import MLPEncoder
 from .cross_model.bert_components import BertAttention, LinearLayer, BertSelfAttention, TrainablePositionalEncoding
-from . import config
 class Attention_TOPN(nn.Module):
     def __init__(self, args):
         super(Attention_TOPN, self).__init__()
@@ -49,7 +48,6 @@ class Attention_TOPN(nn.Module):
         
         self.fc_out_1 = nn.Linear(hidden_dim, output_dim1)
         self.fc_out_2 = nn.Linear(hidden_dim, output_dim2)
-        
         "新加注意力"
         self.video_pos_embed = TrainablePositionalEncoding(max_position_embeddings=config.max_video_l,
                                                            hidden_size=config.hidden_size, dropout=config.input_drop)

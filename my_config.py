@@ -80,6 +80,7 @@ PATH_TO_FEATURES = {
     'SIMSv2': os.path.join(DATA_DIR['SIMSv2'], 'features'),
     'AFFWILD2': os.path.join(DATA_DIR['AFFWILD2'], 'features'),
     'MER2024': os.path.join(DATA_DIR['MER2024'], 'features'),
+    # 'MER2024': os.path.join(DATA_DIR['MER2024'], 'features_25030'),
 }
 PATH_TO_LABEL = {
 	'MER2023': os.path.join(DATA_DIR['MER2023'], 'label-6way.npz'),

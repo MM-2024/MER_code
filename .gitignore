@@ -6,3 +6,4 @@ tools
 *.npz
 *.csv
 **.vscode/**
+**.ckpt

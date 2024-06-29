@@ -1,0 +1,9 @@
+**__pycache__/**
+*.pyc
+mer2024-dataset
+mer2024-dataset-process
+tools
+*.npz
+*.csv
+**.vscode/**
+**.ckpt

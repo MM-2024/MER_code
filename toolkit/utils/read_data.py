@@ -61,7 +61,7 @@ def func_read_multiprocess(feature_root, names, processor=None, read_type='feat'
             params.append((feature_root, name, processor, model_name))
             processed_names.append(name)  # 特征存在时，记录名称
         else:
-            #print(f"Feature not found for {feature_root +'/'+ name}, skipping.")
+            print(f"Feature not found for {feature_root +'/'+ name}, skipping.")
             pass
 
     print(f'when process {feature_root.split('/')[-1]}, we have ',len(params))  # 打印存在的特征数量

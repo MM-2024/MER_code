@@ -223,10 +223,10 @@ AUDIO_RANK_LOW2HIGH = [
 
 TEXT_RANK_LOW2HIGH = [
     'XLNet-base', 'ELECTRA-large', 'MOSS-7B', 'PERT-large', 'PERT-base', 'LERT-large', 'ELECTRA-base', 'LERT-base', 'RoBERTa-base', 
-    'MacBERT-base', 'RoBERTa-large', 'ChatGLM2-6B', 'MacBERT-large', 'BLOOM-7B', 'Baichuan-13B', 
+    'MacBERT-base', 'RoBERTa-large', 'ChatGLM2-6B', 'MacBERT-large', 'BLOOM-7B', 'Baichuan-13B', 'MacBERT-large',
 ]
 
 IMAGR_RANK_LOW2HIGH = [
     'VideoMAE-base', 'EmoNet',  'DINOv2-large', 'SENet-FER2013', 'ResNet-FER2013', 
-    'MANet-RAFDB', 'EVA-02-base', 'CLIP-base', 'VideoMAE-base (VoxCeleb2)', 'VideoMAE-base (MER2023)', 'CLIP-large', 'VideoMAE-large (VoxCeleb2)'
+    'MANet-RAFDB', 'EVA-02-base', 'CLIP-base', 'VideoMAE-base (VoxCeleb2)', 'VideoMAE-base (MER2023)', 'CLIP-large',
 ]

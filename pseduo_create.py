@@ -87,6 +87,10 @@ def train_or_eval_model(args, model, reg_loss, cls_loss, dataloader, epoch, opti
     )
     return save_results
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
+
 if __name__ == '__main__':
     # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --gpu=2
     
@@ -154,13 +158,13 @@ if __name__ == '__main__':
     if args.test_snr is not None:
         args.save_root = f'{args.save_root}-noise'
     if args.fusion_topn is not None:
-        args.save_root = f'{args.save_root}-new-multitop'
+        args.save_root = f'{args.save_root}-multitop'
     whole_features = [args.audio_feature, args.text_feature, args.video_feature]
     whole_features = [item for item in whole_features if item is not None]
     if len(set(whole_features)) == 0:
         args.save_root = f'{args.save_root}-others'
     elif len(set(whole_features)) == 1:
-        args.save_root = f'{args.save_root}-new-unimodal'
+        args.save_root = f'{args.save_root}-unimodal'
     elif len(set(whole_features)) == 2:
         args.save_root = f'{args.save_root}-bimodal'
     elif len(set(whole_features)) == 3:
@@ -243,6 +247,7 @@ if __name__ == '__main__':
 
             epoch_store = {}
 
+            
             ## training and validation
             train_results = train_or_eval_model(args, model, reg_loss, cls_loss, train_loader, epoch=epoch, optimizer=optimizer, train=True )
             #print(len(train_loader))
@@ -284,30 +289,84 @@ if __name__ == '__main__':
     ## store cv results (using average) cross-valdation即为cv
     # print (folder_save[0].keys())
     cv_result = gain_cv_results(folder_save) 
-    save_path = f'{save_resroot}/cv_{prefix_name}_{cv_result}_{name_time}.npz'
+    # save_path = f'{save_resroot}/cv_{prefix_name}_{cv_result}_{name_time}.npz'
+    save_path = f'{save_resroot}/cv_{prefix_name}_{cv_result}_{name_time}_best(128,0.2,0.0001,nodebug3).npz'
     print (f'save results in {save_path}')
     np.savez_compressed(save_path,
                         args=np.array(args, dtype=object))
 
     ## store test1 results => [we store results on 'emo_probs']
+    threshold = 0.9  # 置信度阈值
     for jj in range(len(test_loaders)):
         emo_labels, emo_probs, names = average_folder_for_emos(folder_save, f'test{jj+1}') # 由于全部设置为neutral， emo_labels全是0， 所以下面计算出的结果没啥用
         val_labels, val_preds = average_folder_for_vals(folder_save, f'test{jj+1}') # 实际上会 return [], []
         _, test_result = dataloader_class.calculate_results(emo_probs, emo_labels, val_preds, val_labels) # 这个结果没啥用
 
 
-        # save_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}.npz'
-        # print (f'save results in {save_path}')
-        # np.savez_compressed(save_path,
-        #                     emo_probs=emo_probs,
-        #                     args=np.array(args, dtype=object))
+        save_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}_best(128,0.2,0.0001,nodebug3)_threshold{threshold}.npz'
+        print (f'save results in {save_path}')
+        np.savez_compressed(save_path,
+                            emo_probs=emo_probs,
+                            args=np.array(args, dtype=object))
         
-        # save to csv
-        print(idx2emo_mer) # 标签映射
-        save_csv_path = f'{save_resroot}/cv{jj+1}_{prefix_name}_{cv_result}_{name_time}.csv'
+        # # save to csv to submit results
+        # print(idx2emo_mer)
+        # save_csv_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}.csv'
+        # print (f'save csv file in {save_csv_path}')
+        # with open(save_csv_path, 'w', newline='') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(['name', 'discrete'])
+        #     for ii in range(len(names)):
+        #         writer.writerow([names[ii], emo_probs[ii]])
+        
+        # create pseudo labels
+        save_csv_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}_best(128,0.2,0.0001,nodebug3)_threshold{threshold}.csv'
         print (f'save csv file in {save_csv_path}')
         with open(save_csv_path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['name', 'discrete'])
             for ii in range(len(names)):
-                writer.writerow([names[ii], idx2emo_mer[np.argmax(emo_probs[ii])]])
+                probs = softmax(emo_probs[ii])
+                max_prob = np.max(probs)
+                max_index = np.argmax(probs)
+                if max_prob > threshold:
+                    # print(max_prob)
+                    writer.writerow([names[ii], idx2emo_mer[max_index]])
+
+    # ## store test1 results => [we store results on 'emo_probs']
+    # threshold = 0.9  # 置信度阈值
+    # for jj in range(len(test_loaders)):
+    #     emo_labels, emo_probs, names = average_folder_for_emos(folder_save, f'cv') # 由于全部设置为neutral， emo_labels全是0， 所以下面计算出的结果没啥用
+    #     val_labels, val_preds = average_folder_for_vals(folder_save, f'cv') # 实际上会 return [], []
+    #     _, test_result = dataloader_class.calculate_results(emo_probs, emo_labels, val_preds, val_labels) # 这个结果没啥用
+
+
+    #     save_path = f'{save_resroot}/cv_{prefix_name}_{test_result}_{name_time}.npz'
+    #     print (f'save results in {save_path}')
+    #     np.savez_compressed(save_path,
+    #                         emo_probs=emo_probs,
+    #                         args=np.array(args, dtype=object))
+        
+    #     # # save to csv to submit results
+    #     # print(idx2emo_mer)
+    #     # save_csv_path = f'{save_resroot}/test{jj+1}_{prefix_name}_{test_result}_{name_time}.csv'
+    #     # print (f'save csv file in {save_csv_path}')
+    #     # with open(save_csv_path, 'w', newline='') as f:
+    #     #     writer = csv.writer(f)
+    #     #     writer.writerow(['name', 'discrete'])
+    #     #     for ii in range(len(names)):
+    #     #         writer.writerow([names[ii], emo_probs[ii]])
+        
+    #     # create pseudo labels
+    #     save_csv_path = f'{save_resroot}/cv_{prefix_name}_{test_result}_{name_time}_threshold{threshold}.csv'
+    #     print (f'save csv file in {save_csv_path}')
+    #     with open(save_csv_path, 'w', newline='') as f:
+    #         writer = csv.writer(f)
+    #         writer.writerow(['name', 'discrete'])
+    #         for ii in range(len(names)):
+    #             probs = softmax(emo_probs[ii])
+    #             max_prob = np.max(probs)
+    #             max_index = np.argmax(probs)
+    #             if max_prob > threshold:
+    #                 print(max_prob)
+    #                 writer.writerow([names[ii], idx2emo_mer[max_index]])

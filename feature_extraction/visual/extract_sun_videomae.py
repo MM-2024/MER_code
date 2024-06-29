@@ -364,8 +364,8 @@ def main(args):
         face_npys = face_npys[:10]
     print (f'process sample number: {len(face_npys)}')
 
-    for ii, face_npy in tqdm(enumerate(face_npys)):
-        print (f'process on {ii}|{len(face_npys)}: {face_npy}')
+    for ii, face_npy in tqdm(enumerate(face_npys), total=len(face_npys)):
+        #print (f'process on {ii}|{len(face_npys)}: {face_npy}')
         try:
             vid = os.path.basename(face_npy).rsplit('.', 1)[0]
             save_file = os.path.join(save_dir, f'{vid}.npy')

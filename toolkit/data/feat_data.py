@@ -35,7 +35,7 @@ class Data_Feat(Dataset):
 
         print(type(names))
         #if type(names) == list:
-        print('here',len(names)) # here 5030
+        print('here we have ',len(names), 'samples ') # here 5030
         # 检查特征文件是否存在，如果不存在则从列表中移除
         existing_names = []
         for name in self.names:
@@ -47,11 +47,12 @@ class Data_Feat(Dataset):
             if os.path.exists(audio_path)  and os.path.exists(video_path) and os.path.exists(text_path):
                 existing_names.append(name)
             else:
-                print(f"Feature not found for {name}, skipping.")
+                #print(f"Feature not found for {name}, skipping.")
                 pass
-
+        
         # 更新names列表为只包含存在的特征文件的名称
         self.names = existing_names
+        print(f'and we can only use {len(self.names)} samples')
         # 现在使用更新后的names列表调用func_read_multiprocess
         audios, self.adim = func_read_multiprocess(audio_root, self.names, read_type='feat')
         texts,  self.tdim = func_read_multiprocess(text_root,  self.names, read_type='feat')

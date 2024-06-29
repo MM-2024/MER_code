@@ -90,6 +90,12 @@ step5: unimodal baseline => test different unimodal features
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --video_feature=videomae-large-UTT --audio_feature=chinese-hubert-large-UTT --text_feature=qwen_chinese-macbert-large-UTT --gpu=2
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=chinese-hubert-large-UTT --text_feature=chinese-hubert-large-UTT --video_feature=chinese-hubert-large-UTT --gpu=0
 # python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=clip-vit-large-patch14-UTT --text_feature=clip-vit-large-patch14-UTT --video_feature=clip-vit-large-patch14-UTT --gpu=0
+# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=videomae-large-VoxCeleb2-99-UTT --text_feature=videomae-large-VoxCeleb2-99-UTT --video_feature=videomae-large-VoxCeleb2-99-UTT --gpu=0
+# python -u main-release.py --model='attention' --feat_type='utt' --dataset=MER2024 --audio_feature=videomae-base-VoxCeleb2-99-UTT --text_feature=videomae-base-VoxCeleb2-99-UTT --video_feature=videomae-base-VoxCeleb2-99-UTT --gpu=0
+
+
+# 可选参数 [print_iters] [debug] [batch_size]
+
 
 step6: multimodal baseline => [fusion_topn 1~6; fusion_modality in ['AV', 'AT', 'VT', 'AVT']]
 6.1 adjust AUDIO_RANK_LOW2HIGH  / TEXT_RANK_LOW2HIGH / IMAGR_RANK_LOW2HIGH  in toolkit/globals.py

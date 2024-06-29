@@ -54,7 +54,7 @@ PATH_TO_RAW_FACE = {
     'MELD': os.path.join(DATA_DIR['MELD'], 'openface_face'),
     'SIMSv2': os.path.join(DATA_DIR['SIMSv2'], 'openface_face'),
     'AFFWILD2': os.path.join(DATA_DIR['AFFWILD2'], 'openface_face'),
-    'MER2024': os.path.join(DATA_DIR['MER2024'], 'croped'), # '/data/public_datasets/MER_2024/mer2024-dataset-process/croped'
+    'MER2024': os.path.join(DATA_DIR['MER2024'], 'croped_openface'), # '/data/public_datasets/MER_2024/mer2024-dataset-process/croped'
 }
 PATH_TO_TRANSCRIPTIONS = {
 	'MER2023': os.path.join(DATA_DIR['MER2023'], 'transcription-engchi-polish.csv'),
@@ -92,6 +92,7 @@ PATH_TO_LABEL = {
     'MELD': os.path.join(DATA_DIR['MELD'], 'label.npz'),
     'SIMSv2': os.path.join(DATA_DIR['SIMSv2'], 'label.npz'),
     'MER2024': os.path.join(DATA_DIR['MER2024'], 'label-6way.npz'),
+    #'MER2024': os.path.join(DATA_DIR['MER2024'], 'hubertlarge-softlabel-0.9-best(128,0.2,0.0001)-6way.npz'),
 }
 
 # pre-trained models, including supervised and unsupervised

@@ -11,8 +11,8 @@ def final_test(data_loader, model, feature_level, device):
     saved_features = {}
     for batchid, batch in enumerate(data_loader): # 每个视频，无论多长，都采样4次
 
-        if batchid % 10 == 0: # 查看运行进度
-            print (f'process on {batchid}|{len(data_loader)}')
+        # if batchid % 10 == 0: # 查看运行进度
+        #     print (f'process on {batchid}|{len(data_loader)}')
 
         videos = batch[0] # [64, 3, 16, 160, 160]
         frmids = batch[1] # [64], 对于句子级别全是0，对于帧级别会有差异

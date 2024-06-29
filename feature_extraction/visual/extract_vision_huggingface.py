@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 # import config
 import sys
-sys.path.append('/home/hao/Project/MERTools/MER2024')
+sys.path.append('../../')
 import my_config
 
 ##################### Pretrained models #####################
@@ -37,14 +37,8 @@ def func_opencv_to_numpy(img):
 
 def func_read_frames(face_dir, vid):
     npy_path  = os.path.join(face_dir, vid, f'{vid}.npy')
-    if os.path.exists(npy_path):
-        frames = np.load(npy_path)
-    else:
-        frames = []
-        for frame in sorted(os.listdir(os.path.join(face_dir, vid)), key=lambda f: int(os.path.splitext(f)[0])):
-            frame_path = os.path.join(face_dir, vid, frame)
-            frames.append(cv2.imread(frame_path))
-        frames = np.array(frames)
+    assert os.path.exists(npy_path), f'Error: {vid} does not have frames.npy!'
+    frames = np.load(npy_path)
     return frames
 
 # 策略2：VideoMAE修订，采用孙总提供的采样代码
@@ -109,7 +103,6 @@ if __name__ == '__main__':
     parser.add_argument('--videomae_type', type=str, default=None, help='videomae input type: [None or sunlicai]')
     parser.add_argument('--gpu', type=int, default=0, help='gpu id')
     params = parser.parse_args()
-    # --dataset=MER2024 --feature_level='UTTERANCE' --model_name='videomae-base'                   --gpu=0   
 
     print(f'==> Extracting {params.model_name} embeddings...')
     model_name = params.model_name.split('.')[0]    # 'videomae-base'
@@ -153,97 +146,93 @@ if __name__ == '__main__':
     error_file = []
 
     for i, vid in tqdm(enumerate(vids, 1), total=len(vids)):
+
+        save_file = os.path.join(save_dir, f'{vid}.npy')
+        if os.path.exists(save_file): continue
         #print(f"Processing video '{vid}' ({i}/{len(vids)})...")
         # save_file = os.path.join(save_dir, f'{vid}.npy')
         # if os.path.exists(save_file): continue
 
         # forward process [different model has its unique mode, it is hard to unify them as one process]
         # => split into batch to reduce memory usage
-        try:
-            with torch.no_grad():
-                frames = func_read_frames(face_dir, vid) # 单个视频所有帧的npy文件
-                if params.model_name in [CLIP_VIT_BASE, CLIP_VIT_LARGE]:
-                    frames = [func_opencv_to_image(frame) for frame in frames]
-                    inputs = processor(images=frames, return_tensors="pt")['pixel_values']
+        with torch.no_grad():
+            frames = func_read_frames(face_dir, vid)
+            if params.model_name in [CLIP_VIT_BASE, CLIP_VIT_LARGE]:
+                frames = [func_opencv_to_image(frame) for frame in frames]
+                inputs = processor(images=frames, return_tensors="pt")['pixel_values']
+                if params.gpu != -1: inputs = inputs.to("cuda")
+                batches = split_into_batch(inputs, bsize=32)
+                embeddings = []
+                for batch in batches:
+                    embeddings.append(model.get_image_features(batch)) # [58, 768]
+                embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
+
+            elif params.model_name in [DATA2VEC_VISUAL]:
+                frames = [func_opencv_to_image(frame) for frame in frames]
+                inputs = processor(images=frames, return_tensors="pt")['pixel_values'] # [nframe, 3, 224, 224]
+                if params.gpu != -1: inputs = inputs.to("cuda")
+                batches = split_into_batch(inputs, bsize=32)
+                embeddings = []
+                for batch in batches: # [32, 3, 224, 224]
+                    hidden_states = model(batch, output_hidden_states=True).hidden_states # [58, 196 patch + 1 cls, feat=768]
+                    embeddings.append(torch.stack(hidden_states)[-1].sum(dim=1)) # [58, 768]
+                embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
+
+            elif params.model_name in [DINO2_LARGE, DINO2_GIANT]:
+                frames = resample_frames_uniform(frames, nframe=64) # 加速特征提起：这种方式更加均匀的采样64帧
+                frames = [func_opencv_to_image(frame) for frame in frames]
+                inputs = processor(images=frames, return_tensors="pt")['pixel_values'] # [nframe, 3, 224, 224]
+                if params.gpu != -1: inputs = inputs.to("cuda")
+                batches = split_into_batch(inputs, bsize=32)
+                embeddings = []
+                for batch in batches: # [32, 3, 224, 224]
+                    hidden_states = model(batch, output_hidden_states=True).hidden_states # [58, 196 patch + 1 cls, feat=768]
+                    embeddings.append(torch.stack(hidden_states)[-1].sum(dim=1)) # [58, 768]
+                embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
+
+            elif params.model_name in [VIDEOMAE_BASE, VIDEOMAE_LARGE]:
+                # videoVAE: only supports 16 frames inputs
+                if  params.videomae_type == 'sunlicai':
+                    batches = resample_frames_sunlicai(frames)
+                else:
+                    batches = [resample_frames_uniform(frames)] # convert to list of batches
+                embeddings = []
+                for batch in batches:
+                    frames = [func_opencv_to_numpy(frame) for frame in batch] # 16 * [112, 112, 3]
+                    inputs = processor(list(frames), return_tensors="pt")['pixel_values'] # [1, 16, 3, 224, 224]
                     if params.gpu != -1: inputs = inputs.to("cuda")
-                    batches = split_into_batch(inputs, bsize=32)
-                    embeddings = []
-                    for batch in batches:
-                        embeddings.append(model.get_image_features(batch)) # [58, 768]
-                    embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
+                    outputs = model(inputs).last_hidden_state # [1, 1586, 768]
+                    num_patches_per_frame = (model.config.image_size // model.config.patch_size) ** 2 # 14*14
+                    outputs = outputs.view(16 // model.config.tubelet_size, num_patches_per_frame, -1) # [seg_number, patch, featdim]
+                    embeddings.append(outputs.mean(dim=1)) # [seg_number, featdim]
+                embeddings = torch.cat(embeddings, axis=0)
 
-                elif params.model_name in [DATA2VEC_VISUAL]:
-                    frames = [func_opencv_to_image(frame) for frame in frames]
-                    inputs = processor(images=frames, return_tensors="pt")['pixel_values'] # [nframe, 3, 224, 224]
-                    if params.gpu != -1: inputs = inputs.to("cuda")
-                    batches = split_into_batch(inputs, bsize=32)
-                    embeddings = []
-                    for batch in batches: # [32, 3, 224, 224]
-                        hidden_states = model(batch, output_hidden_states=True).hidden_states # [58, 196 patch + 1 cls, feat=768]
-                        embeddings.append(torch.stack(hidden_states)[-1].sum(dim=1)) # [58, 768]
-                    embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
+            elif params.model_name in [EVACLIP_VIT]:
+                frames = [func_opencv_to_image(frame) for frame in frames]
+                inputs = torch.stack([transforms(frame) for frame in frames]) # [117, 3, 224, 224]
+                if params.gpu != -1: inputs = inputs.to("cuda")
+                batches = split_into_batch(inputs, bsize=32)
+                embeddings = []
+                for batch in batches:
+                    embeddings.append(model(batch)) # [58, 768]
+                embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
+    
+        embeddings = embeddings.detach().squeeze().cpu().numpy()
+        EMBEDDING_DIM = max(EMBEDDING_DIM, np.shape(embeddings)[-1])
 
-                elif params.model_name in [DINO2_LARGE, DINO2_GIANT]:
-                    frames = resample_frames_uniform(frames, nframe=64) # 加速特征提起：这种方式更加均匀的采样64帧
-                    frames = [func_opencv_to_image(frame) for frame in frames]
-                    inputs = processor(images=frames, return_tensors="pt")['pixel_values'] # [nframe, 3, 224, 224]
-                    if params.gpu != -1: inputs = inputs.to("cuda")
-                    batches = split_into_batch(inputs, bsize=32)
-                    embeddings = []
-                    for batch in batches: # [32, 3, 224, 224]
-                        hidden_states = model(batch, output_hidden_states=True).hidden_states # [58, 196 patch + 1 cls, feat=768]
-                        embeddings.append(torch.stack(hidden_states)[-1].sum(dim=1)) # [58, 768]
-                    embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
-
-                elif params.model_name in [VIDEOMAE_BASE, VIDEOMAE_LARGE]: 
-                    # videoVAE: only supports 16 frames inputs
-                    if  params.videomae_type == 'sunlicai':
-                        batches = resample_frames_sunlicai(frames)
-                    else:
-                        batches = [resample_frames_uniform(frames)] # convert to list of batches
-                    embeddings = []
-                    for batch in batches: # 对于每一个视频
-                        frames = [func_opencv_to_numpy(frame) for frame in batch] # 16 * [112, 112, 3]
-                        inputs = processor(list(frames), return_tensors="pt")['pixel_values'] # [1, 16, 3, 224, 224]
-                        if params.gpu != -1: inputs = inputs.to("cuda")
-                        outputs = model(inputs).last_hidden_state # [1, 1568, 768] which 1568=16/2*14*14
-                        num_patches_per_frame = (model.config.image_size // model.config.patch_size) ** 2 # 14*14
-                        outputs = outputs.view(16 // model.config.tubelet_size, num_patches_per_frame, -1) # [seg_number, patch, featdim]
-                        embeddings.append(outputs.mean(dim=1)) # [seg_number, featdim] # 平均每帧特征
-                    embeddings = torch.cat(embeddings, axis=0) # 每个视频的特征 [video_num, seg_num, featdim]
-
-                elif params.model_name in [EVACLIP_VIT]:
-                    frames = [func_opencv_to_image(frame) for frame in frames]
-                    inputs = torch.stack([transforms(frame) for frame in frames]) # [117, 3, 224, 224]
-                    if params.gpu != -1: inputs = inputs.to("cuda")
-                    batches = split_into_batch(inputs, bsize=32)
-                    embeddings = []
-                    for batch in batches:
-                        embeddings.append(model(batch)) # [58, 768]
-                    embeddings = torch.cat(embeddings, axis=0) # [frames_num, 768]
-        
-            embeddings = embeddings.detach().squeeze().cpu().numpy()
-            EMBEDDING_DIM = max(EMBEDDING_DIM, np.shape(embeddings)[-1])
-
-            # save into npy
-            save_file = os.path.join(save_dir, f'{vid}.npy')
-            if params.feature_level == 'FRAME':
-                embeddings = np.array(embeddings).squeeze()
-                if len(embeddings) == 0:
-                    embeddings = np.zeros((1, EMBEDDING_DIM))
-                elif len(embeddings.shape) == 1:
-                    embeddings = embeddings[np.newaxis, :]
-                np.save(save_file, embeddings)
-            else:
-                embeddings = np.array(embeddings).squeeze()
-                if len(embeddings) == 0:
-                    embeddings = np.zeros((EMBEDDING_DIM, ))
-                elif len(embeddings.shape) == 2:
-                    embeddings = np.mean(embeddings, axis=0)
-                np.save(save_file, embeddings)
-        except Exception as e:
-            print(f"Error: {e} while processing video '{vid}'...") # 防止某些文件夹为空导致出现错误
-            error_file.append(vid)
-            continue
-
-    print(f'all error files: {error_file}')
+        # save into npy
+        save_file = os.path.join(save_dir, f'{vid}.npy')
+        if params.feature_level == 'FRAME':
+            embeddings = np.array(embeddings).squeeze()
+            if len(embeddings) == 0:
+                embeddings = np.zeros((1, EMBEDDING_DIM))
+            elif len(embeddings.shape) == 1:
+                embeddings = embeddings[np.newaxis, :]
+            np.save(save_file, embeddings)
+        else:
+            embeddings = np.array(embeddings).squeeze()
+            if len(embeddings) == 0:
+                embeddings = np.zeros((EMBEDDING_DIM, ))
+            elif len(embeddings.shape) == 2:
+                embeddings = np.mean(embeddings, axis=0)
+            np.save(save_file, embeddings)

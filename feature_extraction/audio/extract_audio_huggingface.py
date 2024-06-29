@@ -104,6 +104,7 @@ def extract(model_name, audio_files, save_dir, feature_level, gpu):
 
             ## store values
             csv_file = os.path.join(save_dir, f'{vid}.npy')
+            print(f"Feature shape: {feature.shape}")
             if feature_level == 'UTTERANCE':
                 feature = np.array(feature).squeeze()
                 if len(feature.shape) != 1:

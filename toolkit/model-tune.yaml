@@ -90,8 +90,11 @@ mctn:
 attention:
   hidden_dim: [64, 128, 256]
   dropout: [0.2, 0.3, 0.4, 0.5]
-  grad_clip: [-1.0]
   lr: [1e-3, 1e-4]
+  grad_clip: [-1.0]
+  # hidden_dim: [128]
+  # dropout: [0.2]
+  # lr: [1e-4]
 
 e2e_model:
   hidden_dim: [128, 256] 

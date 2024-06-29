@@ -216,6 +216,11 @@ def extract_embedding(model_name, trans_dir, save_dir, feature_level, gpu=-1, pu
         # --------------------------------------------------
         print(f'Processing {name} ({idx}/{len(df)})...')
 
+        csv_file = os.path.join(save_dir, f'{name}.npy')
+        if os.path.exists(csv_file):
+            print(f'Feature for {name} already exists. Skipping...')
+            continue
+        
         # extract embedding from sentences
         embeddings = []
         if pd.isna(sentence) == False and len(sentence) > 0:
